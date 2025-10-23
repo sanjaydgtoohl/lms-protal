@@ -2,8 +2,11 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\IndustryController;
+use Carbon\Carbon;
 
 // -------------------------------------------------------
 // Public routes (no authentication required)
@@ -12,7 +15,7 @@ use App\Http\Controllers\Api\UserController;
 $router->group(['prefix' => 'v1'], function () use ($router) {
     
     // Authentication routes
-    $router->group(['prefix' => 'auth'], function () use ($router) {      
+    $router->group(['prefix' => 'auth'], function () use ($router) {     
         $router->post('register', 'Api\AuthController@register');
         $router->post('login', 'Api\AuthController@login');
         $router->post('forgot-password','Api\AuthController@forgotPassword');
@@ -51,6 +54,33 @@ $router->group(['prefix' => 'v1', 'middleware' => 'jwt.auth'], function () use (
         $router->put('/', 'Api\UserController@updateProfile');
         $router->get('login-history', 'Api\UserController@getLoginHistory');
     });
+
+    // Industry routes
+    
+    $router->group(['prefix' => 'industries'], function () use ($router) {
+    
+        $router->get('/', 'IndustryController@index');
+        $router->post('/', 'IndustryController@store');
+        $router->get('{id}', 'IndustryController@show');
+        $router->put('{id}', 'IndustryController@update');
+        $router->delete('{id}', 'IndustryController@destroy');
+    });
+
+    $router->group(['prefix' => 'designations'], function () use ($router) {
+        $router->get('/', 'DesignationController@index');
+        $router->post('/', 'DesignationController@store');
+        $router->get('{id}', 'DesignationController@show');
+        $router->put('{id}', 'DesignationController@update');
+        $router->delete('{id}', 'DesignationController@destroy');
+    });
+
+    $router->group(['prefix' => 'departments'], function () use ($router) {
+        $router->get('/', 'DepartmentController@index');
+        $router->post('/', 'DepartmentController@store');
+        $router->get('{id}', 'DepartmentController@show');
+        $router->put('{id}', 'DepartmentController@update');
+        $router->delete('{id}', 'DepartmentController@destroy');
+    });
 });
 
 // -------------------------------------------------------
@@ -64,7 +94,7 @@ $router->group(['prefix' => 'v1/admin', 'middleware' => ['jwt.auth', 'role:admin
             'message' => 'Admin dashboard accessed successfully',
             'data' => [
                 'admin_panel' => true,
-                'timestamp' => now()->toISOString()
+                'timestamp' => Carbon::now()->toIso8601String()
             ]
         ]);
     });
@@ -80,7 +110,7 @@ $router->get('{any:.*}', function () {
         'message' => 'API endpoint not found',
         'error_code' => 'NOT_FOUND',
         'meta' => [
-            'timestamp' => now()->toISOString(),
+            'timestamp' => Carbon::now()->toIso8601String(),
             'status_code' => 404,
         ]
     ], 404);
